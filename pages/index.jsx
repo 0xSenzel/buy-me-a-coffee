@@ -212,7 +212,7 @@ export default function Home() {
         buyMeACoffee.off("NewMemo", onNewMemo);
       }
     };
-  }, [contractABI, getMemos]);
+  }, [contractABI]);
 
   return (
     <div className={styles.container}>
