@@ -296,7 +296,7 @@ export default function Home() {
                 margin: "5px",
               }}
             >
-              <p style={{ fontWeight: "bold" }}>"{memo.message}"</p>
+              <p style={{ fontWeight: 'bold' }}>"{memo.message}"</p>
               <p>
                 From: {memo.name} at {memo.timestamp.toString()}
               </p>
