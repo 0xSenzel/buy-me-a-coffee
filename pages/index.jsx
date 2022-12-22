@@ -1,11 +1,12 @@
-import abi from '../utils/BuyMeACoffee.json';
+import abi from "../utils/BuyMeACoffee.json";
 import { ethers } from "ethers";
-import Head from 'next/head'
-import Image from 'next/image'
+import Head from "next/head";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import styles from '../styles/Home.module.css'
+import styles from "../styles/Home.module.css";
 import Select from "react-select";
 import NativeSelect from "@material-ui/core/NativeSelect";
+import Modal from "react-modal";
 
 export default function Home() {
   // Contract Address & ABI
@@ -18,36 +19,43 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [memos, setMemos] = useState([]);
   const [withdrawTo, setWithdrawTo] = useState("");
-  const [coffeeValue, setCoffeeValue] = useState("");
+  const [coffeeValue, setCoffeeValue] = useState("0.001");
+  const [coffeeLabel, setCoffeeLabel] = useState("Small");
+  const [formClicked, setFormClicked] = useState(false);
 
   const onNameChange = (event) => {
     setName(event.target.value);
-  }
+  };
 
   const onMessageChange = (event) => {
     setMessage(event.target.value);
-  }
+  };
 
   const onAddressChange = (event) => {
     setWithdrawTo(event.target.value);
-  }
+  };
 
   const coffeeSize = [
-    {value: 0.001, label: "Small"},
-    {value: 0.003, label: "Large"}
+    { value: 0.001, label: "Small" },
+    { value: 0.003, label: "Large" },
   ];
 
   const handleChange = (coffeeSize) => {
     setCoffeeValue(coffeeSize.value);
+    setCoffeeLabel(coffeeSize.label);
     console.log(coffeeValue);
-  }
+  };
+
+  const onFormClicked = () => {
+    setFormClicked(true);
+  };
 
   // Wallet connection logic
   const isWalletConnected = async () => {
     try {
       const { ethereum } = window;
 
-      const accounts = await ethereum.request({method: 'eth_accounts'})
+      const accounts = await ethereum.request({ method: "eth_accounts" });
       console.log("accounts: ", accounts);
 
       if (accounts.length > 0) {
@@ -59,11 +67,11 @@ export default function Home() {
     } catch (error) {
       console.log("error: ", error);
     }
-  }
+  };
 
   const connectWallet = async () => {
     try {
-      const {ethereum} = window;
+      const { ethereum } = window;
 
       if (!ethereum) {
         console.log("please install MetaMask");
@@ -81,7 +89,7 @@ export default function Home() {
 
   const buyCoffee = async () => {
     try {
-      const {ethereum} = window;
+      const { ethereum } = window;
 
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum, "any");
@@ -91,12 +99,12 @@ export default function Home() {
           contractABI,
           signer
         );
-        
-        console.log("buying coffee..")
+
+        console.log("buying coffee..");
         const coffeeTxn = await buyMeACoffee.buyCoffee(
-          name ? name : "anon",
+          name ? name : "Anonymous",
           message ? message : "Enjoy your coffee!",
-          {value: ethers.utils.parseEther(`${coffeeValue}`)}
+          { value: ethers.utils.parseEther(`${coffeeValue}`) }
         );
 
         await coffeeTxn.wait();
@@ -124,22 +132,22 @@ export default function Home() {
           contractAddress,
           contractABI,
           signer
-        ); 
+        );
 
         console.log("Withdrawing to:", withdrawTo);
         const withdrawTxn = await buyMeACoffee.withdrawTips(
-          withdrawTo ? withdrawTo: "Address to send the tips"
+          withdrawTo ? withdrawTo : "Address to send the tips"
         );
 
         await withdrawTxn.wait();
-        console.log("Withdrawn!", withdrawTxn.hash);    
+        console.log("Withdrawn!", withdrawTxn.hash);
 
         setWithdrawTo("");
       } else {
         console.log("Failed to withdraw");
-      } 
+      }
     } catch (error) {
-        console.log(error);
+      console.log(error);
     }
   };
 
@@ -155,7 +163,7 @@ export default function Home() {
           contractABI,
           signer
         );
-        
+
         console.log("fetching memos from the blockchain..");
         const memos = await buyMeACoffee.getMemos();
         console.log("fetched!");
@@ -163,12 +171,11 @@ export default function Home() {
       } else {
         console.log("Metamask is not connected");
       }
-      
     } catch (error) {
       console.log(error);
     }
   };
-  
+
   useEffect(() => {
     let buyMeACoffee;
     isWalletConnected();
@@ -184,22 +191,18 @@ export default function Home() {
           address: from,
           timestamp: new Date(timestamp * 1000),
           message,
-          name
-        }
+          name,
+        },
       ]);
     };
 
-    const {ethereum} = window;
+    const { ethereum } = window;
 
     // Listen for new memo events.
     if (ethereum) {
       const provider = new ethers.providers.Web3Provider(ethereum, "any");
       const signer = provider.getSigner();
-      buyMeACoffee = new ethers.Contract(
-        contractAddress,
-        contractABI,
-        signer
-      );
+      buyMeACoffee = new ethers.Contract(contractAddress, contractABI, signer);
 
       buyMeACoffee.on("NewMemo", onNewMemo);
     }
@@ -208,7 +211,7 @@ export default function Home() {
       if (buyMeACoffee) {
         buyMeACoffee.off("NewMemo", onNewMemo);
       }
-    }
+    };
   }, []);
 
   return (
@@ -216,50 +219,34 @@ export default function Home() {
       <Head>
         <title>Buy 0xSenzel a Coffee!</title>
         <meta name="description" content="Tipping site" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/latte.png" />
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Buy 0xSenzel a Coffee!
-        </h1>
-        
+        <h1 className={styles.title}>Buy 0xSenzel a Coffee!</h1>
         {currentAccount ? (
-          <div>
-            <input
-              id="withdrawTo"
-              type="text"
-              placeholder="Address withdraw to..."
-              className={styles.withdrawForm}
-              onChange={onAddressChange}
-            />
-            <br></br>
-            <button 
-                  type="button"
-                  className={styles.withdrawButton}
-                  onClick={withdraw}
-                >
-              Empty your tipping jar!
-              </button>
+          <div className={styles.donateElements}>
+            <button className={styles.openFormButton} onClick={onFormClicked}>
+              Withdraw
+            </button>
             <form>
               <div>
-                <label>
-                  Name
-                </label>
-                <br/>
+                <label className={styles.donateText}>Name</label>
+                <br />
                 <input
                   id="name"
                   type="text"
-                  placeholder="anon"
+                  placeholder="Enter your name"
                   onChange={onNameChange}
-                  />
+                  className={styles.donateInput}
+                />
               </div>
-              <br/>
+              <br />
               <div>
-                <label>
+                <label className={styles.donateText}>
                   Send 0xSenzel a message
                 </label>
-                <br/>
+                <br />
 
                 <textarea
                   rows={3}
@@ -267,51 +254,96 @@ export default function Home() {
                   id="message"
                   onChange={onMessageChange}
                   required
-                >
-                </textarea>
+                  className={styles.donateInput}
+                ></textarea>
               </div>
-              <div> 
-                <Select 
-                  options={coffeeSize} 
+              <div>
+                <Select
+                  options={coffeeSize}
                   value={coffeeSize.value}
                   onChange={handleChange}
+                  className={styles.donateSelect}
                 />
                 <button
                   type="button"
                   className={styles.buy}
                   onClick={buyCoffee}
                 >
-                  Tip me a small coffee for {coffeeValue} ETH
+                  Tip me a {coffeeLabel} coffee for {coffeeValue} ETH
                 </button>
               </div>
             </form>
           </div>
         ) : (
-          <button onClick={connectWallet}> Connect your wallet </button>
+          <button onClick={connectWallet} className={styles.connect}>
+            {" "}
+            Connect your wallet{" "}
+          </button>
         )}
       </main>
 
-      {currentAccount && (<h1>Memos received</h1>)}
-      
-      {currentAccount && (memos.map((memo, idx) => {
-        return (
-          <div key={idx} style={{border:"2px solid", "borderRadius":"5px", padding: "5px", margin: "5px"}}>
-            <p style={{"fontWeight":"bold"}}>"{memo.message}"</p>
-            <p>From: {memo.name} at {memo.timestamp.toString()}</p>
-          </div>
-        )
-      }))}
+      {currentAccount && <h1>Memos received</h1>}
+
+      {currentAccount &&
+        memos.map((memo, idx) => {
+          return (
+            <div
+              key={idx}
+              style={{
+                border: "2px solid",
+                borderRadius: "5px",
+                padding: "5px",
+                margin: "5px",
+              }}
+            >
+              <p style={{ fontWeight: "bold" }}>"{memo.message}"</p>
+              <p>
+                From: {memo.name} at {memo.timestamp.toString()}
+              </p>
+            </div>
+          );
+        })}
+
+      {formClicked && (
+        <Modal
+          isOpen={formClicked}
+          onRequestClose={() => setFormClicked(false)}
+          root={document.getElementById("__next")}
+          className={styles.withdrawForm}
+        >
+          <input
+            id="withdrawTo"
+            type="text"
+            placeholder="Address withdraw to..."
+            className={styles.withdrawInput}
+            onChange={onAddressChange}
+          />
+          <br></br>
+          <button
+            type="button"
+            className={styles.withdrawButton}
+            onClick={withdraw}
+          >
+            Empty your tipping jar!
+          </button>
+          <button
+            onClick={() => setFormClicked(false)}
+            className={styles.withdrawCloseButton}
+          >
+            X
+          </button>
+        </Modal>
+      )}
 
       <footer className={styles.footer}>
         <a
-          href="https://alchemy.com/?a=roadtoweb3weektwo"
+          href="https://twitter.com/0xSenzeI"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Created by @0xSenzel for Alchemy's Road to Web3 lesson two!
+          Created by @0xSenzel
         </a>
       </footer>
     </div>
-  )
+  );
 }
-
