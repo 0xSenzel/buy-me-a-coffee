@@ -1,34 +1,84 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Buy Me a Coffee DAPP
 
-## Getting Started
+This repo contains coursework project from [Alchemy University](https://university.alchemy.com/) completed by [0xsenzel](https://github.com/0xSenzel/) for [Road To Web3](https://docs.alchemy.com/docs/welcome-to-the-road-to-web3) lesson.
 
-First, run the development server:
+## Project Info
 
-```bash
-npm run dev
-# or
-yarn dev
+Buy Me A Coffee is a popular website that creators, educators, entertainers, and all kinds of people use to create a landing page where anyone can send some amount of money as a thank you for their services. However, in order to use it, you must have a bank account and a credit card. Not everyone has that!
+
+A benefit of decentralized applications built on top of a blockchain is that anyone from around the world can access the app using just an Ethereum wallet, which anyone can set up for free in under 1 minute.
+
+## Project Demo
+
+<figure>
+<img src="./public/demo1.PNG" alt="demo1" style="width:100%">
+<p align="center">Fig.1 - Home Page</p>
+</figure>
+
+<br/>
+
+<figure>
+<img src="./public/demo2.PNG" alt="demo2" style="width:100%">
+<p align="center">Fig.2 - Connected with wallet</p>
+</figure>
+
+<br/>
+
+<figure>
+<img src="./public/demo3.PNG" alt="demo3" style="width:100%">
+<p align="center">Fig.3 - Withdraw Form For Owner to Withdraw Eth</p>
+</figure>
+
+<br/>
+
+## Project Setup
+
+### Hardhat
+
+Head to [hardhat-tutorial](./smart-contracts/) folder:
+
+Install dependencies
+
+```
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Compile smart contract
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```
+npx hardhat compile
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+To deploy smart contracts: <br/>
+Head to [hardhat.config.js](./hardhat-tutorial/hardhat.config.js) file, change the value of:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+- `GOERLI_URL` with your own Ethereum Network API
+- `PRIVATE_KEY` with your Ethereum wallet's private key
+- `GOERLI_ETHERSCAN` with your Etherscan's API Key
 
-## Learn More
+Then run the following command.
 
-To learn more about Next.js, take a look at the following resources:
+```
+npx hardhat run scripts/deploy.js --network goerli
+npx hardhat verify --network mumbai YOUR_SMARTCONTRACT_ADDRESS "CONSTRUCTOR ARG1" "CONSTRUCTOR ARG2"
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+<br/>
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### React & Next Js
 
-## Deploy on Vercel
+At [root](./) folder
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+npm install
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Replace the variable inside [this file](./utils/BuyMeACoffee.json) with your contract's ABIs.
+
+- Replace line 13 `contractAddress` variable inside [index.jsx](./pages/index.jsx) with your own deployed contract.
+
+To run the app locally:
+
+```
+npm run dev
+```
