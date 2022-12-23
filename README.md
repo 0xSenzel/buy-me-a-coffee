@@ -67,7 +67,7 @@ npx hardhat verify --network mumbai YOUR_SMARTCONTRACT_ADDRESS "CONSTRUCTOR ARG1
 
 ### React & Next Js
 
-At [root](./) folder
+At root folder:
 
 ```
 npm install
